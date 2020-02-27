@@ -1,0 +1,43 @@
+spring:
+  datasource:
+    username: root
+    password: root123
+    url: jdbc:mysql://192.168.1.121:3306/ptp_app?characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
+    driver-class-name:  com.mysql.cj.jdbc.Driver
+    # 此处使用Druid数据库连接池
+    type: com.alibaba.druid.pool.DruidDataSource
+  http:
+    encoding:
+      charset: utf-8
+      force: true
+      enabled: true
+  redis:
+    database: 3
+    host: 192.168.1.120
+    port: 6379
+    password:
+
+
+#mybatis是独立节点，需要单独配置
+mybatis-plus:
+     mapper-locations: classpath:/mapper/*Mapper.xml
+     typeAliasesPackage: com.ant.ptpapp.entity
+
+server:
+  port: 8080
+  tomcat:
+    uri-encoding: utf-8
+  servlet:
+    context-path: /
+
+#自定义参数，可以迁移走
+token:
+  #redis默认过期时间（2小时）(这是自定义的)(毫秒)
+  expirationMilliSeconds: 7200000
+
+#微信相关参数
+weChat:
+  #小程序appid
+  appid: wxfab2755a6cd8daab
+  #小程序密钥
+  secret: 85dc76039c65b6ffcf9839f680a0e874
