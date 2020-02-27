@@ -4,7 +4,6 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
 import com.ant.ptpapp.handler.ApiHandlerInterceptor;
-import org.springframework.boot.SpringBootConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -26,10 +25,7 @@ import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * @author Administrator
- */
-@SpringBootConfiguration
+@Configuration
 @EnableSwagger2
 public class SwaggerConfiguration extends WebMvcConfigurationSupport {
 
@@ -58,19 +54,14 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
         // 多个拦截器组成一个拦截器链
         // addPathPatterns 用于添加拦截规则
         // excludePathPatterns 用户排除拦截
-        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**").excludePathPatterns("/webjars/**").excludePathPatterns("/swagger-ui.html");
+        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**").excludePathPatterns("/webjars/**").excludePathPatterns("/doc.html");
         super.addInterceptors(registry);
     }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
-        // 解决静态资源无法访问
-        registry.addResourceHandler("/**").addResourceLocations("classpath:/static/");
-        // 解决swagger无法访问
-        registry.addResourceHandler("/swagger-ui.html").addResourceLocations("classpath:/META-INF/resources/");
-        // 解决swagger的js文件无法访问
+        registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-        super.addResourceHandlers(registry);
     }
     /**
      * 自定义消息转换器
