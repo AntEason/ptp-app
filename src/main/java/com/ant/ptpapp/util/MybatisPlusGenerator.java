@@ -31,24 +31,26 @@ public class MybatisPlusGenerator {
 
     public void autoGeneration() {
         GlobalConfig config = new GlobalConfig();
-        String dbUrl = "jdbc:mysql://192.168.1.121:3306/ptp_app?characterEncoding=utf-8&serverTimezone=UTC&useSSL=false";
+        String dbUrl = "jdbc:mysql://47.107.159.185:3306/ptp_app?characterEncoding=utf-8&serverTimezone=UTC&useSSL=false";
         DataSourceConfig dataSourceConfig = new DataSourceConfig();
         dataSourceConfig.setDbType(DbType.MYSQL)
                 .setUrl(dbUrl)
-                .setUsername("root")
-                .setPassword("root123")
+                .setUsername("yc")
+                .setPassword("yc")
                 .setDriverName("com.mysql.cj.jdbc.Driver");
         StrategyConfig strategyConfig = new StrategyConfig();
         strategyConfig
                 .setCapitalMode(true)
                 .setEntityLombokModel(false)
+                .setInclude("ptp_report")
                 // .setDbColumnUnderline(true)
                 .setNaming(NamingStrategy.underline_to_camel);
         config.setActiveRecord(false)
                 .setEnableCache(false)
                 .setAuthor("yichen")
                 //指定输出文件夹位置
-                .setOutputDir("F:\\pull\\ptp-app\\src\\main\\java")
+//                .setOutputDir("F:\\pull\\ptp-app\\src\\main\\java")
+                .setOutputDir("src/main/java")
                 .setFileOverride(true)
                 .setServiceName("%sService");
         new AutoGenerator().setGlobalConfig(config)
@@ -64,8 +66,8 @@ public class MybatisPlusGenerator {
 
     public static void main(String[] args) {
         // TODO Auto-generated method stub
-        MybatisPlusGenerator generator = MybatisPlusGenerator.getSingle();
-        generator.autoGeneration();
+//        MybatisPlusGenerator generator = MybatisPlusGenerator.getSingle();
+//        generator.autoGeneration();
     }
 
 

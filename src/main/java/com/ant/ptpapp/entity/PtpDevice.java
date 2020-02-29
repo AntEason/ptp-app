@@ -2,16 +2,16 @@ package com.ant.ptpapp.entity;
 
 import com.baomidou.mybatisplus.annotation.IdType;
 import com.baomidou.mybatisplus.annotation.TableId;
-import java.time.LocalDateTime;
 import java.io.Serializable;
+import java.util.Date;
 
 /**
  * <p>
- * 
+ *
  * </p>
  *
  * @author yichen
- * @since 2020-02-26
+ * @since 2020-02-28
  */
 public class PtpDevice implements Serializable {
 
@@ -36,7 +36,7 @@ public class PtpDevice implements Serializable {
     /**
      * 安装时间
      */
-    private LocalDateTime installationTime;
+    private Date installationTime;
 
     /**
      * 1.进闸口 2.车厢  3.出闸口
@@ -56,12 +56,17 @@ public class PtpDevice implements Serializable {
     /**
      * 创建时间
      */
-    private LocalDateTime createTime;
+    private Date createTime;
 
     /**
      * 设备编号
      */
     private Integer editDeviceId;
+
+    /**
+     * 小程序码
+     */
+    private String recodePath;
 
 
     public Long getDeviceId() {
@@ -88,11 +93,11 @@ public class PtpDevice implements Serializable {
         this.deviceBtName = deviceBtName;
     }
 
-    public LocalDateTime getInstallationTime() {
+    public Date getInstallationTime() {
         return installationTime;
     }
 
-    public void setInstallationTime(LocalDateTime installationTime) {
+    public void setInstallationTime(Date installationTime) {
         this.installationTime = installationTime;
     }
 
@@ -120,11 +125,11 @@ public class PtpDevice implements Serializable {
         this.deviceLine = deviceLine;
     }
 
-    public LocalDateTime getCreateTime() {
+    public Date getCreateTime() {
         return createTime;
     }
 
-    public void setCreateTime(LocalDateTime createTime) {
+    public void setCreateTime(Date createTime) {
         this.createTime = createTime;
     }
 
@@ -136,18 +141,27 @@ public class PtpDevice implements Serializable {
         this.editDeviceId = editDeviceId;
     }
 
+    public String getRecodePath() {
+        return recodePath;
+    }
+
+    public void setRecodePath(String recodePath) {
+        this.recodePath = recodePath;
+    }
+
     @Override
     public String toString() {
         return "PtpDevice{" +
-        "deviceId=" + deviceId +
-        ", deviceName=" + deviceName +
-        ", deviceBtName=" + deviceBtName +
-        ", installationTime=" + installationTime +
-        ", deviceType=" + deviceType +
-        ", deviceAddrese=" + deviceAddrese +
-        ", deviceLine=" + deviceLine +
-        ", createTime=" + createTime +
-        ", editDeviceId=" + editDeviceId +
-        "}";
+                "deviceId=" + deviceId +
+                ", deviceName=" + deviceName +
+                ", deviceBtName=" + deviceBtName +
+                ", installationTime=" + installationTime +
+                ", deviceType=" + deviceType +
+                ", deviceAddrese=" + deviceAddrese +
+                ", deviceLine=" + deviceLine +
+                ", createTime=" + createTime +
+                ", editDeviceId=" + editDeviceId +
+                ", recodePath=" + recodePath +
+                "}";
     }
 }

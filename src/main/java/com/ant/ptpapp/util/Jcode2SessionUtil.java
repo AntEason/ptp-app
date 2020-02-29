@@ -2,6 +2,7 @@ package com.ant.ptpapp.util;
 
 import com.alibaba.fastjson.JSONObject;
 import com.ant.ptpapp.common.WeChatUrl;
+import io.swagger.models.auth.In;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -16,6 +17,7 @@ import org.codehaus.xfire.util.Base64;
 import javax.crypto.Cipher;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
+import java.nio.Buffer;
 import java.security.AlgorithmParameters;
 import java.security.Security;
 import java.util.ArrayList;
@@ -127,4 +129,18 @@ public class Jcode2SessionUtil {
         return HttpUtil.sendPost(WeChatUrl.SEND_TEMPLATE_MESSAGE.getUrl() + "?access_token=" + access_token,params.toString());
     }
 
+
+
+    public static Buffer getUnlimited(String accessToken, String scene, String page , Integer width , boolean autoColor, String lineColor, boolean isHyaline){
+        JSONObject params = new JSONObject();
+        params.put("scene",scene);
+        params.put("page",page);
+        params.put("width",width);
+        params.put("auto_color",autoColor);
+//        params.put("line_color",lineColor);
+        params.put("is_hyaline",isHyaline);
+        String t= HttpUtil.sendPost(WeChatUrl.GET_UNLIMITED.getUrl() + "?access_token=" + accessToken,params.toString());
+        log.info("result======>"+t);
+        return null;
+    }
 }

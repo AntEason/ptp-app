@@ -1,6 +1,8 @@
 package com.ant.ptpapp.service;
 
+import com.ant.ptpapp.common.GenericResponse;
 import com.ant.ptpapp.entity.PtpDevice;
+import com.ant.ptpapp.entity.req.ReqPtpDevice;
 import com.baomidou.mybatisplus.extension.service.IService;
 
 /**

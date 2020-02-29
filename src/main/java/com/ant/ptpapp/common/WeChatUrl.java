@@ -4,7 +4,8 @@ public enum WeChatUrl {
 
     JS_CODE_2_SESSION("https://api.weixin.qq.com/sns/jscode2session")
     ,GET_ACCESS_TOKEN("https://api.weixin.qq.com/cgi-bin/token")
-    ,SEND_TEMPLATE_MESSAGE("https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send")
+    ,SEND_TEMPLATE_MESSAGE("https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send"),
+    GET_UNLIMITED("https://api.weixin.qq.com/wxa/getwxacodeunlimit")
     ;
 
     private String url;

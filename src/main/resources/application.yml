@@ -1,8 +1,8 @@
 spring:
   datasource:
-    username: root
-    password: root123
-    url: jdbc:mysql://192.168.1.121:3306/ptp_app?characterEncoding=utf-8&serverTimezone=UTC&useSSL=false
+    username: yc
+    password: yc
+    url: jdbc:mysql://47.107.159.185:3306/ptp_app?characterEncoding=utf-8&serverTimezone=Asia/Shanghai&useSSL=false
     driver-class-name:  com.mysql.cj.jdbc.Driver
     # 此处使用Druid数据库连接池
     type: com.alibaba.druid.pool.DruidDataSource
@@ -13,16 +13,18 @@ spring:
       enabled: true
   redis:
     database: 3
-    host: 192.168.1.120
+    host: 47.107.159.185
     port: 6379
     password:
 
 
 #mybatis是独立节点，需要单独配置
 mybatis-plus:
-     mapper-locations: classpath:/mapper/*Mapper.xml
-     typeAliasesPackage: com.ant.ptpapp.entity
-
+    mapper-locations: classpath:/mapper/*Mapper.xml
+    typeAliasesPackage: com.ant.ptpapp.entity
+    global-config:
+      db-config:
+        field-strategy: not_null
 server:
   port: 8080
   tomcat:
@@ -41,3 +43,9 @@ weChat:
   appid: wxfab2755a6cd8daab
   #小程序密钥
   secret: 85dc76039c65b6ffcf9839f680a0e874
+  #二维码的宽度，单位 px，最小 280px，最大 1280px
+  width: 430
+  #自动配置线条颜色，如果颜色依然是黑色，则说明不建议配置主色调，默认 false
+  autoColor: false
+  #是否需要透明底色，为 true 时，生成透明底色的小程序
+  isHyaline: false

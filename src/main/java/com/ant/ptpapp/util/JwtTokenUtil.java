@@ -1,6 +1,7 @@
 package com.ant.ptpapp.util;
 
 
+import com.ant.ptpapp.entity.PtpUserInfo;
 import com.ant.ptpapp.entity.User;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
@@ -28,7 +29,7 @@ public class JwtTokenUtil {
         return Jwts.builder()
                 .setClaims(claims)
                 .setSubject(subject)//主题
-                //.setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
+//                .setExpiration(new Date(System.currentTimeMillis() + expirationSeconds * 1000))
                 .signWith(SignatureAlgorithm.HS512, SALT) // 不使用公钥私钥
                 //.signWith(SignatureAlgorithm.RS256, privateKey)
                 .compact();
@@ -39,9 +40,9 @@ public class JwtTokenUtil {
      * @param user
      * @return
      */
-    public static String generateToken(User user){
+    public static String generateToken(PtpUserInfo user){
         return Jwts.builder()
-                .setSubject(user.getId().toString())
+                .setSubject(user.getUserInfoId().toString())
                 .setExpiration(new Date(System.currentTimeMillis()))
                 .setIssuedAt(new Date())
                 .setIssuer("JAMES")

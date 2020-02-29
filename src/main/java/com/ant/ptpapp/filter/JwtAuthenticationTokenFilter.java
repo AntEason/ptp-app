@@ -3,10 +3,13 @@ package com.ant.ptpapp.filter;
 import com.alibaba.fastjson.JSON;
 import com.ant.ptpapp.common.GenericResponse;
 import com.ant.ptpapp.common.ServiceError;
+import com.ant.ptpapp.entity.PtpUserInfo;
 import com.ant.ptpapp.entity.User;
 import com.ant.ptpapp.service.SelfUserDetailsService;
 import com.ant.ptpapp.util.*;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -18,9 +21,12 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import javax.servlet.FilterChain;
 import javax.servlet.ServletException;
+import javax.servlet.ServletRequest;
+import javax.servlet.ServletResponse;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.util.HashMap;
 import java.util.Set;
 
@@ -41,42 +47,73 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
     @Autowired
     RedisUtil redisUtil;
 
+
+    static final String ORIGIN = "Origin";
+
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+        String origin = request.getHeader(ORIGIN);
+
+        response.setHeader("Access-Control-Allow-Origin", "*");
+        response.setHeader("Access-Control-Allow-Credentials", "true");
+        response.setHeader("Access-Control-Allow-Methods", "PUT, POST, GET, OPTIONS, DELETE");
+        response.setHeader("Access-Control-Max-Age", "3600");
+        response.setHeader("Access-Control-Allow-Headers", "content-type, authorization");
         String authHeader = request.getHeader("Authorization");
+
         response.setCharacterEncoding("utf-8");
-        if (null == authHeader || !authHeader.startsWith("Bearer ")){
-            filterChain.doFilter(request,response);//token格式不正确
+        if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")){
+            //token格式不正确
+            filterChain.doFilter(request,response);
             return;
         }
         String authToken = authHeader.substring("Bearer ".length());
-
-        String subject = JwtTokenUtil.parseToken(authToken);//获取在token中自定义的subject，用作用户标识，用来获取用户权限
-
+        //获取在token中自定义的subject，用作用户标识，用来获取用户权限
+        String subject = JwtTokenUtil.parseToken(authToken);
+        log.info(" Authorization ======"+authHeader);
         //获取redis中的token信息
 
         if (!redisUtil.hasKey(authToken)){
             //token 不存在 返回错误信息
-            response.getWriter().write(JSON.toJSONString(GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN)));
+            write(JSON.toJSONString(GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN)),response);
             return;
         }
 
-        //获取缓存中的信息(根据自己的业务进行拓展)
-        HashMap<String,Object> hashMap = (HashMap<String, Object>) redisUtil.hget(authToken);
-        //从tokenInfo中取出用户信息
-        User user = new User();
-        user.setId(Long.parseLong(hashMap.get("id").toString())).setAuthorities((Set<? extends GrantedAuthority>) hashMap.get("authorities"));
-        if (null == hashMap){
+        String json= (String) redisUtil.get(authToken);
+        if (StringUtils.isEmpty(json)){
             //用户信息不存在或转换错误，返回错误信息
-            response.getWriter().write(JSON.toJSONString(GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN)));
+            write(JSON.toJSONString(GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN)),response);
             return;
         }
+        PtpUserInfo ptpUserInfo=JSON.parseObject(json,PtpUserInfo.class);
+
         //更新token过期时间
         redisUtil.setKeyExpire(authToken,expirationMilliSeconds);
         //将信息交给security
-        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(user,null,user.getAuthorities());
+        UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(ptpUserInfo,null,null);
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
         filterChain.doFilter(request,response);
+    }
+
+
+    private void write(String json,HttpServletResponse response){
+        OutputStream outputStream=null;
+        try {
+            outputStream = response.getOutputStream();
+            outputStream.write(json.getBytes());
+            outputStream.flush();
+            outputStream.close();
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+        } finally {
+            if (outputStream != null) {
+                try {
+                    outputStream.close();
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
+            }
+        }
     }
 }

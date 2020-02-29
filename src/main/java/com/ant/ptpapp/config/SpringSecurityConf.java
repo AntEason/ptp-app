@@ -11,6 +11,7 @@ import org.springframework.http.HttpMethod;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
+import org.springframework.security.config.annotation.web.builders.WebSecurity;
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter;
 import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -62,18 +63,11 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 
     @Override
     protected void configure(HttpSecurity http) throws Exception {
-
-        // 去掉 CSRF
+        http.cors();
         http.csrf().disable()
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS) //关闭session管理，使用token机制处理
-                .and() .httpBasic().authenticationEntryPoint(authenticationEntryPoint)
-                .and().authorizeRequests().antMatchers("/swagger-ui.html").permitAll()
-                .and().authorizeRequests().antMatchers("/swagger-resources/**").permitAll()
-                .and().authorizeRequests().antMatchers("/images/**").permitAll()
-                .and().authorizeRequests().antMatchers("/webjars/**").permitAll()
-                .and().authorizeRequests().antMatchers("/v2/api-docs").permitAll()
-                .and().authorizeRequests().antMatchers("/configuration/ui").permitAll()
-                .and().authorizeRequests().antMatchers("/configuration/security").permitAll()
+                .and()
+                .httpBasic().authenticationEntryPoint(authenticationEntryPoint)
                 //.and().antMatcher("/login")
                 //.and().authorizeRequests().anyRequest().access("@rbacauthorityservice.hasPermission(request,authentication)")// 自定义权限校验  RBAC 动态 url 认证
 //                .and().authorizeRequests().antMatchers(HttpMethod.GET,"/test").hasAuthority("test:list")
@@ -81,28 +75,22 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 //                .and().authorizeRequests().antMatchers(HttpMethod.PUT,"/test").hasAuthority("test:update")
 //                .and().authorizeRequests().antMatchers(HttpMethod.DELETE,"/test").hasAuthority("test:delete")
 //                .and().authorizeRequests().antMatchers("/test/*").hasAuthority("test:manager")
-                .and().authorizeRequests().antMatchers(HttpMethod.POST,"/login").permitAll() //放行login(这里使用自定义登录)
-                .and().authorizeRequests().antMatchers("/hello").permitAll();
-
-//                .and()
-//                .formLogin()  //开启登录, 定义当需要用户登录时候，转到的登录页面
-//                .loginPage("/test/login.html")
-//                .loginProcessingUrl("/login")
-//                .successHandler(authenticationSuccessHandler) // 登录成功
-//                .failureHandler(authenticationFailureHandler) // 登录失败
-//                .permitAll()
-
-//                .and()
-//                .logout()//默认注销行为为logout
-//                .logoutUrl("/logout")
-//                .logoutSuccessHandler(logoutSuccessHandler)
-//                .permitAll();
-
-        // 无权访问 JSON 格式的数据
-        http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
-        // JWT Filter
-        http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
-
+//                .and().authorizeRequests().antMatchers("/login").permitAll() //放行login(这里使用自定义登录)
+//                .and().authorizeRequests().antMatchers("/hello").permitAll()//permitAll表示不需要认证
+                .and().authorizeRequests().antMatchers("/lind-auth/**").permitAll()
+                .and().authorizeRequests().antMatchers("/QRCode/**").permitAll()
+                .and().authorizeRequests().antMatchers(
+                "/v2/api-docs",
+                "/swagger-resources",
+                "/swagger-resources/**",
+                "/configuration/ui",
+                "/configuration/security",
+                "/doc.html",
+                "/webjars/**"
+                ).permitAll().anyRequest().authenticated();
+                // 无权访问 JSON 格式的数据
+                http.exceptionHandling().accessDeniedHandler(accessDeniedHandler);
+                http.addFilterBefore(jwtAuthenticationTokenFilter, UsernamePasswordAuthenticationFilter.class);
     }
 
     @Bean
