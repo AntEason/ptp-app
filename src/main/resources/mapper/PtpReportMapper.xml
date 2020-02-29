@@ -1,0 +1,100 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.ant.ptpapp.mapper.PtpReportMapper">
+
+    <resultMap id="ptpReport" type="com.ant.ptpapp.entity.PtpReport">
+        <result property="getReportTime" column="get_report_time"/>
+        <result property="outReportTime" column="out_report_time"/>
+        <result property="userId" column="user_id"/>
+        <result property="userPhone" column="user_phone"/>
+        <result property="state" column="state"/>
+        <result property="tripCode" column="trip_code"/>
+        <association property="getReport" javaType="com.ant.ptpapp.entity.PtpTrim">
+            <result property="addrese" column="get_device_addrese"/>
+            <result property="time" column="get_report_time"/>
+        </association>
+        <association property="outReport" javaType="com.ant.ptpapp.entity.PtpTrim">
+            <result property="addrese" column="out_device_addrese"/>
+            <result property="time" column="out_report_time" javaType="date"/>
+        </association>
+        <collection property="inReports" ofType="com.ant.ptpapp.entity.PtpTrim">
+            <result property="addrese" column="in_device_addrese"/>
+            <result property="time" column="in_report_time" />
+        </collection>
+    </resultMap>
+
+
+    <resultMap id="ptpByDeviceInfo" type="com.ant.ptpapp.entity.PtpByDeviceInfo">
+        <result property="userPhone" column="user_name"/>
+        <result property="time" column="create_time"/>
+        <result property="userId" column="user_info_id"/>
+        <result property="userName" column="user_name"/>
+    </resultMap>
+    <select id="selectPageVo" resultMap="ptpReport">
+        SELECT
+        *
+        FROM
+        (
+        SELECT
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.get_device_id ) AS get_device_addrese,
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.out_device_id ) AS out_device_addrese,
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = ir.device_id ) AS in_device_addrese,
+        ( SELECT create_time FROM ptp_device WHERE edit_device_id = ir.device_id ) AS  in_report_time,
+        r.get_report_time,
+        r.out_report_time,
+        r.user_id,
+        r.user_phone,
+        r.state,
+        r.trip_code
+        FROM
+        ptp_report AS r,
+        ptp_in_report AS ir
+        WHERE
+        r.trip_code = ir.trip_code
+        ) AS t
+        WHERE 1=1
+        <if test="userPhone != null and userPhone != '' ">
+         AND t.user_phone = #{userPhone}
+        </if>
+        <if test="userId != null and userId != '' ">
+          AND t.user_id = #{userId}
+        </if>
+        <if test="startTime != null and startTime != '' ">
+             AND t.get_report_time  <![CDATA[ >= ]]> date_format( #{startTime}, '%Y-%m-%d %H:%i:%s' )
+        </if>
+        <if test="endTime != null and endTime != '' ">
+            AND t.get_report_time  <![CDATA[ <= ]]> date_format( #{endTime}, '%Y-%m-%d %H:%i:%s' )
+        </if>
+        <if test="condition != null and condition != '' ">
+            AND (t.get_device_addrese LIKE concat('%',#{condition},'%')  OR t.user_phone LIKE concat('%',#{condition},'%'));
+        </if>
+    </select>
+
+
+    <select id="findByDeviceInfo" resultMap="ptpByDeviceInfo">
+
+        SELECT
+        r.create_time,
+        u.user_name,
+        u.user_info_id,
+        u.user_phone
+        FROM
+        ptp_in_report AS ir
+        INNER JOIN ptp_report AS r ON r.trip_code = ir.trip_code
+        INNER JOIN ptp_user_info AS u ON u.user_info_id = r.user_id
+        WHERE
+        1 = 1
+        <if test="startTime != null and startTime != '' ">
+            AND r.create_time <![CDATA[ >= ]]> date_format( #{startTime}, '%Y-%m-%d %H:%i:%s' )
+        </if>
+        <if test="endTime != null and endTime != '' ">
+            AND r.create_time <![CDATA[ >= ]]> date_format( #{endTime}, '%Y-%m-%d %H:%i:%s' )
+        </if>
+        <if test="condition != null and condition != '' ">
+             AND (u.user_name LIKE concat('%',#{condition},'%')  OR u.user_phone LIKE concat('%',#{condition},'%'))
+        </if>
+        AND ir.device_id =#{deviceId}
+    </select>
+
+
+</mapper>
