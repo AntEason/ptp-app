@@ -1,29 +1,29 @@
 package com.ant.ptpapp.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.ant.ptpapp.common.GenericResponse;
 import com.ant.ptpapp.common.ServiceError;
+import com.ant.ptpapp.entity.PtpDevice;
 import com.ant.ptpapp.entity.PtpUserInfo;
 import com.ant.ptpapp.entity.req.ReqGetPhoneNum;
 import com.ant.ptpapp.entity.req.ReqUserInfo;
+import com.ant.ptpapp.service.PtpDeviceService;
 import com.ant.ptpapp.service.PtpUserInfoService;
 import com.ant.ptpapp.service.WeChatService;
-import com.ant.ptpapp.util.JwtTokenUtil;
-import com.ant.ptpapp.util.MD5Util;
-import com.ant.ptpapp.util.RedisUtil;
-import com.ant.ptpapp.util.wxUtil;
+import com.ant.ptpapp.util.*;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 /**
  * 描述:
@@ -44,7 +44,10 @@ public class LoginController {
         PtpUserInfoService ptpUserInfoService;
 
         @Autowired
-        RedisUtil redisUtill;
+        private PtpDeviceService ptpDeviceService;
+
+        @Autowired
+        RedisUtil redisUtil;
         @PostMapping("/wx/login")
         @ApiOperation(value = "小程序用户登录",tags={"登陆接口"})
         public GenericResponse wxLogin(@RequestBody ReqUserInfo reqUserInfo)throws Exception{
@@ -58,23 +61,28 @@ public class LoginController {
                queryWrapper.eq("user_type","1");
                PtpUserInfo ptpUserInfo= ptpUserInfoService.getOne(queryWrapper);
                if(ptpUserInfo==null){
-                  String userPhone= wxUtil.decrypt(sessionKey,reqUserInfo.getEncryptedData(),reqUserInfo.getIv());
                    ptpUserInfo=new PtpUserInfo();
-                   ptpUserInfo.setUserPhone(userPhone);
+                   ptpUserInfo.setUserName(RandomName.randomName(true,3));
                    ptpUserInfo.setWxOpenId(openid);
                    ptpUserInfo.setUserPwd(MD5Util.getMD5("123456"));
                    ptpUserInfo.setUserType(1);
                    ptpUserInfoService.save(ptpUserInfo);
                }
+                ptpUserInfo.setSessionKey(sessionKey);
                 String token = JwtTokenUtil.generateToken(ptpUserInfo);
-                return GenericResponse.response(ServiceError.NORMAL,token);
+                log.info("=====>"+JSON.toJSONString(ptpUserInfo));
+                redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
+                Map<String,Object> result=new HashMap<>();
+                result.put("token",token);
+                result.put("userInfo",ptpUserInfo);
+                return GenericResponse.response(ServiceError.NORMAL,result);
             //通过手机号密码登陆
             }else if(StringUtils.isNoneEmpty(reqUserInfo.getUserPhone())&&StringUtils.isNoneEmpty(reqUserInfo.getUserPwd())) {
                 QueryWrapper<PtpUserInfo> queryWrapper = new QueryWrapper<>();
                 queryWrapper
                         .eq("user_phone",reqUserInfo.getUserPhone())
                         .eq("user_pwd", MD5Util.getMD5(reqUserInfo.getUserPwd()))
-                        .eq("user_type","2");
+                        .eq("user_type","1");
                 PtpUserInfo ptpUserInfo= ptpUserInfoService.getOne(queryWrapper);
                 if(ptpUserInfo!=null){
                     String token = JwtTokenUtil.generateToken(ptpUserInfo);
@@ -100,13 +108,82 @@ public class LoginController {
         @ApiOperation(value = "后台用户推出登录",tags={"登陆接口"})
         public GenericResponse adminLogin(HttpServletRequest request)throws Exception{
             String authHeader = request.getHeader("Authorization").substring("Bearer ".length());
-            redisUtill.delete(authHeader);
+            redisUtil.delete(authHeader);
             return GenericResponse.response(ServiceError.NORMAL);
         }
 
-        @PostMapping("/wx/getPhoneNum")
-        public GenericResponse getPhoneNum( @RequestBody ReqGetPhoneNum reqGetPhoneNum)throws Exception{
-//            return ptpUserInfoService.adminLogin(reqUserInfo);
+        @PostMapping("/wx/bindPhone")
+        @ApiOperation(value = "微信绑定电话",tags={"登陆接口"})
+        public GenericResponse bindPhone(HttpServletRequest request, @RequestBody ReqGetPhoneNum reqGetPhoneNum)throws Exception{
+            PtpUserInfo ptpUserInfo=  getUserInfo(request);
+            String userPhone= WechatDecryptDataUtil.decryptData(reqGetPhoneNum.getEncryptedData(),ptpUserInfo.getSessionKey(),reqGetPhoneNum.getIv());
+            userPhone=JSONObject.parseObject(userPhone).getString("phoneNumber");
+            QueryWrapper<PtpUserInfo> queryWrapper=new QueryWrapper<>();
+            queryWrapper.eq("wx_open_id",ptpUserInfo.getWxOpenId());
+            PtpUserInfo ptpUserInfos =ptpUserInfoService.getOne(queryWrapper);
+            ptpUserInfo.setUserPhone(userPhone);
+            ptpUserInfo.setUserInfoId(ptpUserInfos.getUserInfoId());
+            boolean result=ptpUserInfoService.updateById(ptpUserInfo);
+            if(result) {
+                String token = request.getHeader("Authorization").substring("Bearer ".length());
+                redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
+                log.info("=======>"+JSON.toJSONString(ptpUserInfo));
+                return GenericResponse.response(ServiceError.NORMAL);
+            }else{
+                return GenericResponse.response(ServiceError.GLOBAL_ERR_BIND_PHONE);
+            }
+        }
+        @PostMapping("/wx/binUserName")
+        @ApiOperation(value = "微信绑定用户名称",tags={"登陆接口"})
+        public GenericResponse binUserName(HttpServletRequest request, @RequestBody ReqGetPhoneNum reqGetPhoneNum)throws Exception{
+            PtpUserInfo ptpUserInfo=  getUserInfo(request);
+            QueryWrapper<PtpUserInfo> queryWrapper=new QueryWrapper<>();
+            queryWrapper.eq("wx_open_id",ptpUserInfo.getWxOpenId());
+            ptpUserInfo =ptpUserInfoService.getOne(queryWrapper);
+            ptpUserInfo.setUserName(reqGetPhoneNum.getUserName());
+            boolean result=ptpUserInfoService.updateById(ptpUserInfo);
+            if(result) {
+                String token = request.getHeader("Authorization").substring("Bearer ".length());
+                redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
+                return GenericResponse.response(ServiceError.NORMAL);
+            }else{
+                return GenericResponse.response(ServiceError.GLOBAL_ERR_BIND_PHONE);
+            }
+        }
+    @GetMapping("/getAllQRCode")
+    @ApiOperation(value = "获取所有设备的小程序码",tags={"登陆接口"})
+    public GenericResponse getAllQRCode(){
+        boolean result=true;
+        QueryWrapper queryWrapper =new QueryWrapper<>();
+        queryWrapper.isNull("recode_path");
+        List<PtpDevice> list= ptpDeviceService.list(queryWrapper);
+        for (PtpDevice ptpDevice: list) {
+            String imageName=ptpDevice.getDeviceBtName()+".png";
+            if(weChatService.createQRCode("deviceName="+ptpDevice.getDeviceBtName(),imageName)){
+                ptpDevice.setRecodePath("QRCode/" +imageName);
+                ptpDeviceService.updateById(ptpDevice);
+            }else{
+                result=false;
+                break;
+            }
+        }
+        if(result){
+            return GenericResponse.response(ServiceError.NORMAL,"创建小程序码成功");
+        }else{
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_PTP_CREATE_QE_CODE);
+        }
+    }
+    /**
+     * 获取用户信息
+     * @param request
+     * @return
+     */
+    public  PtpUserInfo getUserInfo(HttpServletRequest request){
+            String token = request.getHeader("Authorization").substring("Bearer ".length());
+            String json = (String) redisUtil.get(token);
+            if(StringUtils.isNoneEmpty(json)){
+                return JSON.parseObject(json,PtpUserInfo.class);
+            }
             return null;
         }
     }

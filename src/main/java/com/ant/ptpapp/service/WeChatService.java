@@ -19,7 +19,7 @@ public interface WeChatService {
 
     String getAccessToken();
 
-    Buffer createQRCode(String scene);
+    boolean createQRCode(String scene,String fileName);
 
-     String jcode2Session(String code) throws Exception;
+    String jcode2Session(String code) throws Exception;
 }

@@ -26,7 +26,7 @@ public class PtpInReport implements Serializable {
     /**
      * 设备编号
      */
-    private Long deviceId;
+    private String deviceId;
 
     /**
      * 行程编号
@@ -47,11 +47,11 @@ public class PtpInReport implements Serializable {
         this.ptpInReportId = ptpInReportId;
     }
 
-    public Long getDeviceId() {
+    public String getDeviceId() {
         return deviceId;
     }
 
-    public void setDeviceId(Long deviceId) {
+    public void setDeviceId(String deviceId) {
         this.deviceId = deviceId;
     }
 

@@ -78,16 +78,19 @@ public class WeChatServiceImpl implements WeChatService {
     @Override
     public String getAccessToken() {
         JSONObject sessionInfo = JSONObject.parseObject(Jcode2SessionUtil.getAccessToken(appid,secret));
-
         Assert.notNull(sessionInfo,"code 无效");
-        return sessionInfo.getString("access_token");
+        String accessToken=(String)redisUtil.get("accessToken");
+        if(StringUtils.isEmpty(accessToken)){
+             accessToken=sessionInfo.getString("access_token");
+            redisUtil.set("accessToken",accessToken,7200);
+        }
+        return accessToken;
     }
 
     @Override
-    public Buffer createQRCode(String scene) {
+    public boolean createQRCode(String scene,String fileName) {
        String token= getAccessToken();
-        Jcode2SessionUtil.getUnlimited(token,scene,"/page/index/index",width,autoColor,"{\"r\":\"xxx\",\"g\":\"xxx\",\"b\":\"xxx\"}",isHyaline);
-        return null;
+        return Jcode2SessionUtil.getUnlimited(token,scene,null,width,autoColor,fileName,isHyaline);
     }
 
     /**

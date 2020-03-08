@@ -34,7 +34,7 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
-                .enable(true)
+                .enable(false)
                 .select()
                 //扫描端口
                 .apis(RequestHandlerSelectors.basePackage("com.ant.ptpapp.controller"))
@@ -56,7 +56,7 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
         // 多个拦截器组成一个拦截器链
         // addPathPatterns 用于添加拦截规则
         // excludePathPatterns 用户排除拦截
-        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**").excludePathPatterns("/webjars/**").excludePathPatterns("/doc.html");
+        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**");
         super.addInterceptors(registry);
     }
 
@@ -64,7 +64,7 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-        registry.addResourceHandler("/QRCode/**").addResourceLocations("classpath:/QRCode/");
+        registry.addResourceHandler("/QRCode/**").addResourceLocations("file:"+ System.getProperty("user.dir")+"/QRCode/");
     }
     @Override
     public void addCorsMappings(CorsRegistry registry) {
@@ -86,10 +86,23 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
 
         // 配置 FastJson
         FastJsonConfig config = new FastJsonConfig();
-        config.setSerializerFeatures(SerializerFeature.QuoteFieldNames, SerializerFeature.WriteEnumUsingToString,
-                SerializerFeature.WriteMapNullValue, SerializerFeature.WriteDateUseDateFormat,
-                SerializerFeature.DisableCircularReferenceDetect);
-
+        config.setSerializerFeatures(
+                // 保留 Map 空的字段
+                SerializerFeature.WriteMapNullValue,
+                // 将 String 类型的 null 转成""
+                SerializerFeature.WriteNullStringAsEmpty,
+                // 将 Number 类型的 null 转成 0
+                SerializerFeature.WriteNullNumberAsZero,
+                // 将 List 类型的 null 转成 []
+                SerializerFeature.WriteNullListAsEmpty,
+                // 将 Boolean 类型的 null 转成 false
+                SerializerFeature.WriteNullBooleanAsFalse,
+                // 避免循环引用
+                SerializerFeature.DisableCircularReferenceDetect,
+                SerializerFeature.QuoteFieldNames,
+                SerializerFeature.WriteEnumUsingToString,
+                SerializerFeature.WriteMapNullValue,
+                SerializerFeature.WriteDateUseDateFormat);
         // 添加 FastJsonHttpMessageConverter
         FastJsonHttpMessageConverter fastJsonHttpMessageConverter = new FastJsonHttpMessageConverter();
         fastJsonHttpMessageConverter.setFastJsonConfig(config);
@@ -100,6 +113,10 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
 
         // 添加 StringHttpMessageConverter，解决中文乱码问题
         StringHttpMessageConverter stringHttpMessageConverter = new StringHttpMessageConverter(Charset.forName("UTF-8"));
+        List<MediaType> mediaTypeList = new ArrayList<>();
+        // 解决中文乱码问题，相当于在 Controller 上的 @RequestMapping 中加了个属性 produces = "application/json"
+        mediaTypeList.add(MediaType.APPLICATION_JSON);
+        fastJsonHttpMessageConverter.setSupportedMediaTypes(mediaTypeList);
         converters.add(stringHttpMessageConverter);
     }
 }

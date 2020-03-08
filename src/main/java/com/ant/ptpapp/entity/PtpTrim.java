@@ -12,6 +12,12 @@ import java.util.Date;
  */
 @Data
 public class PtpTrim {
+    /**
+     * 上报地址
+     */
     private String addrese;
+    /**
+     * 上报时间
+     */
     private Date time;
 }

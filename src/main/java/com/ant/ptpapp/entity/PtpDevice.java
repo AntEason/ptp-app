@@ -61,7 +61,7 @@ public class PtpDevice implements Serializable {
     /**
      * 设备编号
      */
-    private Integer editDeviceId;
+    private String editDeviceId;
 
     /**
      * 小程序码
@@ -133,11 +133,11 @@ public class PtpDevice implements Serializable {
         this.createTime = createTime;
     }
 
-    public Integer getEditDeviceId() {
+    public String getEditDeviceId() {
         return editDeviceId;
     }
 
-    public void setEditDeviceId(Integer editDeviceId) {
+    public void setEditDeviceId(String editDeviceId) {
         this.editDeviceId = editDeviceId;
     }
 

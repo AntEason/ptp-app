@@ -56,6 +56,9 @@ public class PtpUserInfo implements Serializable {
      */
     private String userName;
 
+    @TableField(exist = false)
+    private String sessionKey;
+
     public Long getUserInfoId() {
         return userInfoId;
     }
@@ -104,6 +107,13 @@ public class PtpUserInfo implements Serializable {
         this.createTime = createTime;
     }
 
+    public String getSessionKey() {
+        return sessionKey;
+    }
+
+    public void setSessionKey(String sessionKey) {
+        this.sessionKey = sessionKey;
+    }
 
     public String getUserName() {
         return userName;

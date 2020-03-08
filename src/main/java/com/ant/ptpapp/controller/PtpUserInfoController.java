@@ -1,6 +1,7 @@
 package com.ant.ptpapp.controller;
 
 
+import com.alibaba.fastjson.JSON;
 import com.ant.ptpapp.common.GenericResponse;
 import com.ant.ptpapp.common.ServiceError;
 import com.ant.ptpapp.entity.PtpDevice;
@@ -9,6 +10,7 @@ import com.ant.ptpapp.entity.req.ReqPtpUserInfoSel;
 import com.ant.ptpapp.entity.req.ReqUserInfo;
 import com.ant.ptpapp.service.PtpUserInfoService;
 import com.ant.ptpapp.service.WeChatService;
+import com.ant.ptpapp.util.RedisUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
@@ -16,8 +18,11 @@ import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.ibatis.annotations.Mapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
+
+import javax.servlet.http.HttpServletRequest;
 
 /**
  * <p>
@@ -34,6 +39,9 @@ import org.springframework.web.bind.annotation.*;
 @Slf4j
 @RequestMapping("/userInfo")
 public class PtpUserInfoController {
+
+    @Autowired
+    RedisUtil redisUtil;
 
     @Autowired
     PtpUserInfoService ptpUserInfoService;
@@ -59,5 +67,21 @@ public class PtpUserInfoController {
         return GenericResponse.response(ServiceError.UN_KNOW_ERROR);
     }
 
+
+    /**
+     * 获取用户信息
+     * @param request
+     * @return
+     */
+    @PostMapping("/wx/getUserInfo")
+    @ApiOperation(value = "获取当前用户信息",tags={"用户操作接口"})
+    public GenericResponse getUserInfo(HttpServletRequest request){
+        String token = request.getHeader("Authorization").substring("Bearer ".length());
+        String json = (String) redisUtil.get(token);
+        if(StringUtils.isNoneEmpty(json)){
+            return GenericResponse.response(ServiceError.NORMAL,JSON.parseObject(json,PtpUserInfo.class));
+        }
+        return GenericResponse.response(ServiceError.UN_KNOW_ERROR);
+    }
 }
 

@@ -1,5 +1,7 @@
 package com.ant.ptpapp.handler;
 
+import com.alibaba.fastjson.JSON;
+import com.ant.ptpapp.util.RequestWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -7,6 +9,7 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
+import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.BufferedReader;
@@ -22,7 +25,6 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
     private NamedThreadLocal<Long> startTimeThreadLocal = new NamedThreadLocal<Long>("StopWatch-startTimed");
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-
         log.info("##############################【一个MVC完整请求开始】##############################");
 
         log.info("*******************MVC业务处理开始**********************");
@@ -35,9 +37,13 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
             log.info("执行目标方法: {}", handler);
 
             Map<String, ?> params = request.getParameterMap();
+            log.info("当前请求参数打印：");
             if (!params.isEmpty()) {
-                log.info("当前请求参数打印：");
-                print(request.getParameterMap(), "参数");
+                print(request.getParameterMap(),"参数");
+            }
+           String json= new RequestWrapper(request).getBodyString();
+            if(StringUtils.isNoneEmpty(json)){
+                log.info("参数 : {}",json);
             }
         } catch (Exception e) {
             log.error("MVC业务处理-拦截器异常：", e);

@@ -38,19 +38,19 @@ public class PtpUserInfoServiceImpl extends ServiceImpl<PtpUserInfoMapper, PtpUs
     public GenericResponse adminLogin(ReqUserInfo reqUserInfo) {
         QueryWrapper<PtpUserInfo> queryWrapper = new QueryWrapper<>();
         queryWrapper
-                .eq("user_phone",reqUserInfo.getUserPhone())
+                .eq("user_phone", reqUserInfo.getUserPhone())
                 .eq("user_pwd", MD5Util.getMD5(reqUserInfo.getUserPwd()))
-                .eq("user_type","2");
-        PtpUserInfo ptpUserInfo= ptpUserInfoMapper.selectOne(queryWrapper);
-        if(ptpUserInfo!=null){
+                .eq("user_type", "2");
+        PtpUserInfo ptpUserInfo = ptpUserInfoMapper.selectOne(queryWrapper);
+        if (ptpUserInfo != null) {
             String token = JwtTokenUtil.generateToken(ptpUserInfo);
             redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
-            Map<String,Object> result=new HashMap<>();
-            result.put("token",token);
-            result.put("userPhone",reqUserInfo.getUserPhone());
-            return GenericResponse.response(ServiceError.NORMAL,result);
+            Map<String, Object> result = new HashMap<>();
+            result.put("token", token);
+            result.put("userPhone", reqUserInfo.getUserPhone());
+            return GenericResponse.response(ServiceError.NORMAL, result);
+        } else{
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_USER);
         }
-        return GenericResponse.response(ServiceError.UN_KNOW_ERROR);
-
     }
 }

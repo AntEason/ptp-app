@@ -40,12 +40,12 @@ public class PtpReport implements Serializable {
     /**
      * 进闸设备编号
      */
-    private Long getDeviceId;
+    private String getDeviceId;
 
     /**
      * 出闸设备编号
      */
-    private Long outDeviceId;
+    private String outDeviceId;
 
     /**
      * 出闸上报时间
@@ -77,12 +77,41 @@ public class PtpReport implements Serializable {
      */
     private Date createTime;
 
+    /**
+     * 上报类型（0.正常上报 1.补报
+     */
+    private Integer reportType;
+    /**
+     * 补报进闸口
+     */
+    private String repairGet;
 
+    /**
+     * 补报线路
+     */
+    private String repairLine;
+
+    /**
+     * 补报出闸口
+     */
+    private String repairOut;
+    /**
+     * 用户名称
+     */
     private  String userName;
+    /**
+     * 补报进闸地址
+     */
     @TableField(exist = false)
     private PtpTrim getReport;
+    /**
+     * 出站进闸地址
+     */
     @TableField(exist = false)
     private PtpTrim outReport;
+    /**
+     * 车厢上报地址
+     */
     @TableField(exist = false)
     private List<PtpTrim> inReports;
 
@@ -134,19 +163,19 @@ public class PtpReport implements Serializable {
         this.getReportTime = getReportTime;
     }
 
-    public Long getGetDeviceId() {
+    public String getGetDeviceId() {
         return getDeviceId;
     }
 
-    public void setGetDeviceId(Long getDeviceId) {
+    public void setGetDeviceId(String getDeviceId) {
         this.getDeviceId = getDeviceId;
     }
 
-    public Long getOutDeviceId() {
+    public String getOutDeviceId() {
         return outDeviceId;
     }
 
-    public void setOutDeviceId(Long outDeviceId) {
+    public void setOutDeviceId(String outDeviceId) {
         this.outDeviceId = outDeviceId;
     }
 
@@ -206,20 +235,57 @@ public class PtpReport implements Serializable {
         this.userName = userName;
     }
 
+    public Integer getReportType() {
+        return reportType;
+    }
+
+    public void setReportType(Integer reportType) {
+        this.reportType = reportType;
+    }
+
+    public String getRepairGet() {
+        return repairGet;
+    }
+
+    public void setRepairGet(String repairGet) {
+        this.repairGet = repairGet;
+    }
+
+    public String getRepairLine() {
+        return repairLine;
+    }
+
+    public void setRepairLine(String repairLine) {
+        this.repairLine = repairLine;
+    }
+
+    public String getRepairOut() {
+        return repairOut;
+    }
+
+    public void setRepairOut(String repairOut) {
+        this.repairOut = repairOut;
+    }
+
     @Override
     public String toString() {
         return "PtpReport{" +
-        "reportId=" + reportId +
-        ", tripCode=" + tripCode +
-        ", getReportTime=" + getReportTime +
-        ", getDeviceId=" + getDeviceId +
-        ", outDeviceId=" + outDeviceId +
-        ", outReportTime=" + outReportTime +
-        ", remark=" + remark +
-        ", userId=" + userId +
-        ", userPhone=" + userPhone +
-        ", state=" + state +
-        ", createTime=" + createTime +
-        "}";
+                "reportId=" + reportId +
+                ", tripCode=" + tripCode +
+                ", getReportTime=" + getReportTime +
+                ", getDeviceId=" + getDeviceId +
+                ", outDeviceId=" + outDeviceId +
+                ", outReportTime=" + outReportTime +
+                ", userName=" + userName +
+                ", userId=" + userId +
+                ", userPhone=" + userPhone +
+                ", state=" + state +
+                ", reportType=" + reportType +
+                ", repairGet=" + repairGet +
+                ", repairLine=" + repairLine +
+                ", repairOut=" + repairOut +
+                ", remark=" + remark +
+                ", createTime=" + createTime +
+                "}";
     }
 }

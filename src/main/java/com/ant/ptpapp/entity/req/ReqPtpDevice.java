@@ -53,5 +53,5 @@ public class ReqPtpDevice {
      * 设备编号
      */
     @ApiModelProperty("设备编号")
-    private Integer editDeviceId;
+    private String editDeviceId;
 }

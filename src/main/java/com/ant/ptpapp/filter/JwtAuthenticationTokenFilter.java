@@ -52,6 +52,9 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
+
+        HttpServletRequest httpServletRequest = (HttpServletRequest) request;
+        ServletRequest requestWrapper = new RequestWrapper(httpServletRequest);
         String origin = request.getHeader(ORIGIN);
 
         response.setHeader("Access-Control-Allow-Origin", "*");
@@ -64,7 +67,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         response.setCharacterEncoding("utf-8");
         if (StringUtils.isEmpty(authHeader) || !authHeader.startsWith("Bearer ")){
             //token格式不正确
-            filterChain.doFilter(request,response);
+            filterChain.doFilter(requestWrapper,response);
             return;
         }
         String authToken = authHeader.substring("Bearer ".length());
@@ -73,7 +76,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         log.info(" Authorization ======"+authHeader);
         //获取redis中的token信息
 
-        if (!redisUtil.hasKey(authToken)){
+        if (StringUtils.isEmpty((String)redisUtil.get(authToken))){
             //token 不存在 返回错误信息
             write(JSON.toJSONString(GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN)),response);
             return;
@@ -93,7 +96,10 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         UsernamePasswordAuthenticationToken authenticationToken = new UsernamePasswordAuthenticationToken(ptpUserInfo,null,null);
         authenticationToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
         SecurityContextHolder.getContext().setAuthentication(authenticationToken);
-        filterChain.doFilter(request,response);
+        log.info("================进入过滤器======================");
+        // 防止流读取一次后就没有了, 所以需要将流继续写出去
+
+        filterChain.doFilter(requestWrapper,response);
     }
 
 

@@ -9,6 +9,10 @@
         <result property="userPhone" column="user_phone"/>
         <result property="state" column="state"/>
         <result property="tripCode" column="trip_code"/>
+        <result property="repairGet" column="repair_get"/>
+        <result property="repairLine" column="repair_line"/>
+        <result property="repairOut"  column="repair_out"/>
+        <result property="reportType" column="report_type"/>
         <association property="getReport" javaType="com.ant.ptpapp.entity.PtpTrim">
             <result property="addrese" column="get_device_addrese"/>
             <result property="time" column="get_report_time"/>
@@ -30,6 +34,11 @@
         <result property="userId" column="user_info_id"/>
         <result property="userName" column="user_name"/>
     </resultMap>
+
+    <resultMap id="ptpTrim" type="com.ant.ptpapp.entity.PtpTrim">
+        <result property="addrese" column="in_device_addrese"/>
+        <result property="time" column="create_time" />
+    </resultMap>
     <select id="selectPageVo" resultMap="ptpReport">
         SELECT
         *
@@ -40,6 +49,10 @@
         ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.out_device_id ) AS out_device_addrese,
         ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = ir.device_id ) AS in_device_addrese,
         ( SELECT create_time FROM ptp_device WHERE edit_device_id = ir.device_id ) AS  in_report_time,
+        r.repair_get,
+        r.report_type,
+        r.repair_line,
+        r.repair_out,
         r.get_report_time,
         r.out_report_time,
         r.user_id,
@@ -68,6 +81,7 @@
         <if test="condition != null and condition != '' ">
             AND (t.get_device_addrese LIKE concat('%',#{condition},'%')  OR t.user_phone LIKE concat('%',#{condition},'%'));
         </if>
+        ORDER BY t.get_report_time DESC
     </select>
 
 
@@ -97,4 +111,62 @@
     </select>
 
 
+    <select id="findByTripCode" resultMap="ptpReport">
+        SELECT
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.get_device_id ) AS get_device_addrese,
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.out_device_id ) AS out_device_addrese,
+        r.repair_get,
+        r.report_type,
+        r.repair_line,
+        r.repair_out,
+        r.get_report_time,
+        r.out_report_time,
+        r.user_id,
+        r.user_phone,
+        r.state,
+        r.trip_code
+        FROM
+        ptp_report AS r
+        WHERE
+        1=1
+        AND r.user_id=#{userId}
+        <if test="tripCode != null and tripCode != '' ">
+            AND r.trip_code=#{tripCode}
+        </if>
+        ORDER BY r.get_report_time DESC
+    </select>
+
+
+    <select id="findByTripCodePage" resultMap="ptpReport">
+        SELECT
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.get_device_id ) AS get_device_addrese,
+        ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.out_device_id ) AS out_device_addrese,
+        r.repair_get,
+        r.report_type,
+        r.repair_line,
+        r.repair_out,
+        r.get_report_time,
+        r.out_report_time,
+        r.user_id,
+        r.user_phone,
+        r.state,
+        r.trip_code
+        FROM
+        ptp_report AS r
+        WHERE
+        1=1
+        AND r.user_id=#{userId}
+        ORDER BY r.get_report_time DESC
+    </select>
+
+
+    <select id="findByTripCodeInReport" resultMap="ptpTrim">
+        SELECT
+            ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = ir.device_id ) AS in_device_addrese,
+            ir.create_time
+        FROM
+            ptp_in_report AS ir
+        WHERE
+	        ir.trip_code = #{tripCode}
+    </select>
 </mapper>

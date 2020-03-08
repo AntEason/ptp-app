@@ -12,7 +12,7 @@ spring:
       force: true
       enabled: true
   redis:
-    database: 3
+    database: 1
     host: 47.107.159.185
     port: 6379
     password:

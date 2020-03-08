@@ -50,7 +50,7 @@ public class MybatisPlusGenerator {
                 .setAuthor("yichen")
                 //指定输出文件夹位置
 //                .setOutputDir("F:\\pull\\ptp-app\\src\\main\\java")
-                .setOutputDir("src/main/java")
+                .setOutputDir("\\test\\")
                 .setFileOverride(true)
                 .setServiceName("%sService");
         new AutoGenerator().setGlobalConfig(config)
