@@ -34,7 +34,7 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
     public Docket createRestApi() {
         return new Docket(DocumentationType.SWAGGER_2)
                 .apiInfo(apiInfo())
-                .enable(false)
+                .enable(true)
                 .select()
                 //扫描端口
                 .apis(RequestHandlerSelectors.basePackage("com.ant.ptpapp.controller"))

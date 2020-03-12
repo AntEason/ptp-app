@@ -1,7 +1,7 @@
 package com.ant.ptpapp.handler;
 
-import com.alibaba.fastjson.JSON;
 import com.ant.ptpapp.util.RequestWrapper;
+import com.ant.ptpapp.util.ResponseWrapper;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -9,11 +9,8 @@ import org.springframework.core.NamedThreadLocal;
 import org.springframework.web.servlet.HandlerInterceptor;
 import org.springframework.web.servlet.ModelAndView;
 
-import javax.servlet.ServletRequest;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
-import java.io.BufferedReader;
-import java.io.IOException;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Set;
@@ -33,9 +30,9 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
             startTimeThreadLocal.set(timed);
 
             String requestURL = request.getRequestURI();
-            log.info("当前请求的URL：【{} 】", requestURL);
+            String meth = request.getMethod();
+            log.info("当前请求的URL：【{} 】, 请求方法 ： 【{} 】 ", requestURL,meth);
             log.info("执行目标方法: {}", handler);
-
             Map<String, ?> params = request.getParameterMap();
             log.info("当前请求参数打印：");
             if (!params.isEmpty()) {
@@ -43,7 +40,7 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
             }
            String json= new RequestWrapper(request).getBodyString();
             if(StringUtils.isNoneEmpty(json)){
-                log.info("参数 : {}",json);
+                log.info("参数 : {}",json.replaceAll("\t",""));
             }
         } catch (Exception e) {
             log.error("MVC业务处理-拦截器异常：", e);
@@ -69,7 +66,6 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
                 if (modelAndView.getView() != null) {
                     log.info("返回到MVC视图内容类型ContentType：{}", modelAndView.getView().getContentType());
                 }
-
                 if (!modelAndView.getModel().isEmpty()) {
 
                     log.info("返回到MVC视图{}数据打印如下：", modelAndView.getViewName());
@@ -96,7 +92,6 @@ public class ApiHandlerInterceptor implements HandlerInterceptor {
         } catch (Exception e) {
             log.error("MVC完成返回-拦截器异常：", e);
         }
-
         log.info("##############################【一个MVC完整请求完成】##############################");
     }
 
