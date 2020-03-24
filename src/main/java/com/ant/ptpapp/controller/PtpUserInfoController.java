@@ -76,7 +76,11 @@ public class PtpUserInfoController {
     @PostMapping("/wx/getUserInfo")
     @ApiOperation(value = "获取当前用户信息",tags={"用户操作接口"})
     public GenericResponse getUserInfo(HttpServletRequest request){
-        String token = request.getHeader("Authorization").substring("Bearer ".length());
+        String token = request.getHeader("Authorization");
+        if(StringUtils.isEmpty(token)){
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN);
+        }
+        token=token.substring("Bearer ".length());
         String json = (String) redisUtil.get(token);
         if(StringUtils.isNoneEmpty(json)){
             return GenericResponse.response(ServiceError.NORMAL,JSON.parseObject(json,PtpUserInfo.class));

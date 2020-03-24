@@ -101,7 +101,7 @@ public class JwtAuthenticationTokenFilter extends OncePerRequestFilter {
         log.info("================进入过滤器======================");
         // 防止流读取一次后就没有了, 所以需要将流继续写出去
 
-        filterChain.doFilter(requestWrapper,responseWrapper);
+        filterChain.doFilter(requestWrapper,response);
     }
 
 

@@ -7,6 +7,7 @@ import com.ant.ptpapp.common.ServiceError;
 import com.ant.ptpapp.entity.PtpDevice;
 import com.ant.ptpapp.entity.PtpUserInfo;
 import com.ant.ptpapp.entity.req.ReqGetPhoneNum;
+import com.ant.ptpapp.entity.req.ReqUpdatePhoneNum;
 import com.ant.ptpapp.entity.req.ReqUserInfo;
 import com.ant.ptpapp.service.PtpDeviceService;
 import com.ant.ptpapp.service.PtpUserInfoService;
@@ -116,6 +117,9 @@ public class LoginController {
         @ApiOperation(value = "微信绑定电话",tags={"登陆接口"})
         public GenericResponse bindPhone(HttpServletRequest request, @RequestBody ReqGetPhoneNum reqGetPhoneNum)throws Exception{
             PtpUserInfo ptpUserInfo=  getUserInfo(request);
+            if(ptpUserInfo==null){
+                return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN);
+            }
             String userPhone= WechatDecryptDataUtil.decryptData(reqGetPhoneNum.getEncryptedData(),ptpUserInfo.getSessionKey(),reqGetPhoneNum.getIv());
             userPhone=JSONObject.parseObject(userPhone).getString("phoneNumber");
             QueryWrapper<PtpUserInfo> queryWrapper=new QueryWrapper<>();
@@ -173,13 +177,38 @@ public class LoginController {
             return GenericResponse.response(ServiceError.GLOBAL_ERR_PTP_CREATE_QE_CODE);
         }
     }
+
+    @PostMapping("/wx/updatePhone")
+    @ApiOperation(value = "修改电话号码",tags={"登陆接口"})
+    public GenericResponse updatePhone(HttpServletRequest request, @RequestBody ReqUpdatePhoneNum reqUpdatePhoneNum)throws Exception{
+        PtpUserInfo ptpUserInfo=  getUserInfo(request);
+        if(ptpUserInfo==null){
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN);
+        }
+        QueryWrapper<PtpUserInfo> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("wx_open_id",ptpUserInfo.getWxOpenId());
+        PtpUserInfo ptpUserInfos =ptpUserInfoService.getOne(queryWrapper);
+        ptpUserInfo.setUserPhone(reqUpdatePhoneNum.getPhoneNum());
+        ptpUserInfo.setUserInfoId(ptpUserInfos.getUserInfoId());
+        boolean result=ptpUserInfoService.updateById(ptpUserInfo);
+        if(result) {
+            String token = request.getHeader("Authorization").substring("Bearer ".length());
+            redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
+            log.info("=======>"+JSON.toJSONString(ptpUserInfo));
+            return GenericResponse.response(ServiceError.NORMAL);
+        }else{
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_BIND_PHONE);
+        }
+    }
     /**
      * 获取用户信息
      * @param request
      * @return
      */
     public  PtpUserInfo getUserInfo(HttpServletRequest request){
-            String token = request.getHeader("Authorization").substring("Bearer ".length());
+            String token = request.getHeader("Authorization");
+            if(StringUtils.isEmpty(token)){return null;}
+            token=token.substring("Bearer ".length());
             String json = (String) redisUtil.get(token);
             if(StringUtils.isNoneEmpty(json)){
                 return JSON.parseObject(json,PtpUserInfo.class);
