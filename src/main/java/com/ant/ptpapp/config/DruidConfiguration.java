@@ -41,7 +41,6 @@ public class DruidConfiguration {
         servletRegistrationBean.addInitParameter("resetEnable","false");
         return servletRegistrationBean;
     }
-
     /**
      * druid过滤器
      * 注册一个：filterRegistrationBean

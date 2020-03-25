@@ -53,49 +53,32 @@ public class LoginController {
         @ApiOperation(value = "小程序用户登录",tags={"登陆接口"})
         public GenericResponse wxLogin(@RequestBody ReqUserInfo reqUserInfo)throws Exception{
             //通过微信编号登陆
-            if(StringUtils.isNoneEmpty(reqUserInfo.getWxCode())){
-               JSONObject jsonObject=JSONObject.parseObject(weChatService.jcode2Session(reqUserInfo.getWxCode())) ;
-               String openid= jsonObject.getString("openid");
-               String sessionKey= jsonObject.getString("session_key");
-               QueryWrapper<PtpUserInfo>  queryWrapper=new QueryWrapper<>();
-               queryWrapper.eq("wx_open_id",openid);
-               queryWrapper.eq("user_type","1");
-               PtpUserInfo ptpUserInfo= ptpUserInfoService.getOne(queryWrapper);
-               if(ptpUserInfo==null){
-                   ptpUserInfo=new PtpUserInfo();
-                   ptpUserInfo.setUserName(RandomName.randomName(true,3));
-                   ptpUserInfo.setWxOpenId(openid);
-                   ptpUserInfo.setUserPwd(MD5Util.getMD5("123456"));
-                   ptpUserInfo.setUserType(1);
-                   ptpUserInfoService.save(ptpUserInfo);
-               }
+            if(StringUtils.isNoneEmpty(reqUserInfo.getWxCode())) {
+                JSONObject jsonObject = JSONObject.parseObject(weChatService.jcode2Session(reqUserInfo.getWxCode()));
+                String openid = jsonObject.getString("openid");
+                String sessionKey = jsonObject.getString("session_key");
+                QueryWrapper<PtpUserInfo> queryWrapper = new QueryWrapper<>();
+                queryWrapper.eq("wx_open_id", openid);
+                queryWrapper.eq("user_type", "1");
+                PtpUserInfo ptpUserInfo = ptpUserInfoService.getOne(queryWrapper);
+                if (ptpUserInfo == null&&StringUtils.isNotEmpty(openid)) {
+                    ptpUserInfo = new PtpUserInfo();
+                    ptpUserInfo.setUserName(RandomName.randomName(true, 3));
+                    ptpUserInfo.setWxOpenId(openid);
+                    ptpUserInfo.setUserPwd(MD5Util.getMD5("123456"));
+                    ptpUserInfo.setUserType(1);
+                    ptpUserInfoService.save(ptpUserInfo);
+                }
                 ptpUserInfo.setSessionKey(sessionKey);
                 String token = JwtTokenUtil.generateToken(ptpUserInfo);
-                log.info("=====>"+JSON.toJSONString(ptpUserInfo));
+                log.info("=====>" + JSON.toJSONString(ptpUserInfo));
                 redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
-                Map<String,Object> result=new HashMap<>();
-                result.put("token",token);
-                result.put("userInfo",ptpUserInfo);
-                return GenericResponse.response(ServiceError.NORMAL,result);
-            //通过手机号密码登陆
-            }else if(StringUtils.isNoneEmpty(reqUserInfo.getUserPhone())&&StringUtils.isNoneEmpty(reqUserInfo.getUserPwd())) {
-                QueryWrapper<PtpUserInfo> queryWrapper = new QueryWrapper<>();
-                queryWrapper
-                        .eq("user_phone",reqUserInfo.getUserPhone())
-                        .eq("user_pwd", MD5Util.getMD5(reqUserInfo.getUserPwd()))
-                        .eq("user_type","1");
-                PtpUserInfo ptpUserInfo= ptpUserInfoService.getOne(queryWrapper);
-                if(ptpUserInfo!=null){
-                    String token = JwtTokenUtil.generateToken(ptpUserInfo);
-                    return GenericResponse.response(ServiceError.NORMAL,token);
-                }
-                return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_USER);
-            //通过手机号验证码登陆
-            }else if(StringUtils.isNoneEmpty(reqUserInfo.getUserPhone())&&StringUtils.isNoneEmpty(reqUserInfo.getValidateCode())){
-
+                Map<String, Object> result = new HashMap<>();
+                result.put("token", token);
+                result.put("userInfo", ptpUserInfo);
+                return GenericResponse.response(ServiceError.NORMAL, result);
             }
-
-            return weChatService.wxLogin(reqUserInfo.getWxCode());
+            return GenericResponse.response(ServiceError.UN_KNOW_ERROR);
         }
 
         @PostMapping("/admin/login")

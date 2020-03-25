@@ -75,6 +75,7 @@ public class SpringSecurityConf extends WebSecurityConfigurerAdapter {
 //                .and().authorizeRequests().antMatchers("/test/*").hasAuthority("test:manager")
 //                .and().authorizeRequests().antMatchers("/login").permitAll() //放行login(这里使用自定义登录)
 //                .and().authorizeRequests().antMatchers("/hello").permitAll()//permitAll表示不需要认证
+                .and().authorizeRequests().antMatchers("/druid/**").permitAll()
                 .and().authorizeRequests().antMatchers("/lind-auth/**").permitAll()
                 .and().authorizeRequests().antMatchers("/QRCode/**").permitAll()
                 .and().authorizeRequests().antMatchers(

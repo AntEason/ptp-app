@@ -1,11 +1,14 @@
 package com.ant.ptpapp.util;
 
+import lombok.extern.slf4j.Slf4j;
+
 /**
  * 描述:
  *
  * @author yichen
  * @create 2020-02-28 2:58 下午
  */
+@Slf4j
 public class IdWorker{
 
     //下面两个每个5位，加起来就是10位的工作机器id
@@ -22,7 +25,7 @@ public class IdWorker{
         if (datacenterId > maxDatacenterId || datacenterId < 0) {
             throw new IllegalArgumentException(String.format("datacenter Id can't be greater than %d or less than 0",maxDatacenterId));
         }
-        System.out.printf("worker starting. timestamp left shift %d, datacenter id bits %d, worker id bits %d, sequence bits %d, workerid %d",
+      log.info("worker starting. timestamp left shift {}, datacenter id bits {}, worker id bits {}, sequence bits {}, workerid {}",
                 timestampLeftShift, datacenterIdBits, workerIdBits, sequenceBits, workerId);
 
         this.workerId = workerId;
@@ -72,7 +75,7 @@ public class IdWorker{
 
         //获取当前时间戳如果小于上次时间戳，则表示时间戳获取出现异常
         if (timestamp < lastTimestamp) {
-            System.err.printf("clock is moving backwards.  Rejecting requests until %d.", lastTimestamp);
+            log.error("clock is moving backwards.  Rejecting requests until {}.", lastTimestamp);
             throw new RuntimeException(String.format("Clock moved backwards.  Refusing to generate id for %d milliseconds",
                     lastTimestamp - timestamp));
         }
@@ -125,5 +128,4 @@ public class IdWorker{
             System.out.println(worker.nextId());
         }
     }
-
 }

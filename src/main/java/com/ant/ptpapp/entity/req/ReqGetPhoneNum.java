@@ -13,10 +13,10 @@ import lombok.Data;
 @Data
 @ApiModel("绑定（手机号码、用户名称）请求参数")
 public class ReqGetPhoneNum {
-    @ApiModelProperty("用户信息的加密数据")
+    @ApiModelProperty(value = "用户信息的加密数据",required = true)
     String encryptedData;
-    @ApiModelProperty("加密算法的初始向量")
+    @ApiModelProperty(value = "加密算法的初始向量",required = true)
     String iv;
-    @ApiModelProperty("用户名称")
+    @ApiModelProperty(value = "用户名称")
     String userName;
 }

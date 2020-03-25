@@ -3,7 +3,6 @@ package com.ant.ptpapp.config;
 import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.alibaba.fastjson.support.config.FastJsonConfig;
 import com.alibaba.fastjson.support.spring.FastJsonHttpMessageConverter;
-import com.ant.ptpapp.handler.ApiHandlerInterceptor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.MediaType;
@@ -51,19 +50,20 @@ public class SwaggerConfiguration extends WebMvcConfigurationSupport {
                 .build();
     }
 
-    @Override
-    public void addInterceptors(InterceptorRegistry registry) {
-        // 多个拦截器组成一个拦截器链
-        // addPathPatterns 用于添加拦截规则
-        // excludePathPatterns 用户排除拦截
-        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**");
-        super.addInterceptors(registry);
-    }
+//    @Override
+//    public void addInterceptors(InterceptorRegistry registry) {
+//        // 多个拦截器组成一个拦截器链
+//        // addPathPatterns 用于添加拦截规则
+//        // excludePathPatterns 用户排除拦截
+//        registry.addInterceptor(new ApiHandlerInterceptor()).addPathPatterns("/**");
+//        super.addInterceptors(registry);
+//    }
 
     @Override
     public void addResourceHandlers(ResourceHandlerRegistry registry) {
         registry.addResourceHandler("doc.html").addResourceLocations("classpath:/META-INF/resources/");
         registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
+        registry.addResourceHandler("/druid/**").addResourceLocations("classpath:/META-INF/resources/druid/");
         registry.addResourceHandler("/QRCode/**").addResourceLocations("file:"+ System.getProperty("user.dir")+"/QRCode/");
     }
     @Override
