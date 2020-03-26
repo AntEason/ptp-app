@@ -15,6 +15,7 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Field;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -42,12 +43,16 @@ public class LogRecordAspect {
         String uri = request.getRequestURI();
         String queryString = request.getQueryString();
         Object[] args = pjp.getArgs();
+
         String params = "";
         //获取请求参数集合并进行遍历拼接
         if(args.length>0){
             if("POST".equals(method)){
-                Object object = args[0];
-                Map map = getKeyAndValue(object);
+                Map map = null;
+                for (Object arg : args) {
+                    map=new HashMap();
+                    map.putAll(getKeyAndValue(arg));
+                }
                 if(!map.isEmpty()&&map.get("response")==null){
                     params = JSON.toJSONString(map);
                 }
