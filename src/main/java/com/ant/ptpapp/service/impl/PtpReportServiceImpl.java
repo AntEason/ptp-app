@@ -109,8 +109,9 @@ public class PtpReportServiceImpl extends ServiceImpl<PtpReportMapper, PtpReport
             }
             QueryWrapper<PtpInReport> ptp=new QueryWrapper<>();
             ptp.eq("trip_code",tripCode);
+            ptp.eq("device_id",ptpDevice.getEditDeviceId());
             Integer count= ptpInReportMapper.selectCount(ptp);
-            if(count>1){
+            if(count>0){
                 return GenericResponse.response(ServiceError.GLOBAL_ERR_PTP_IN_REPORT_EXISTED);
             }
             PtpInReport ptpInReport=new PtpInReport();

@@ -4,6 +4,7 @@ public enum ServiceError {
 
     NORMAL(1, "操作成功"),
     UN_KNOW_ERROR(-1, "未知错误"),
+    ERROR(-500, "错误信息统一处理"),
 
     /** Global Error */
     GLOBAL_ERR_NO_SIGN_IN(-10001,"未登录或登录过期/Not sign in"),
@@ -15,12 +16,12 @@ public enum ServiceError {
     GLOBAL_ERR_NO_TRIP_CODE(-10007,"上报错误，进闸行为未上报"),
     GLOBAL_ERR_IN_REPORT(-10008,"车厢上报数量不够"),
     GLOBAL_ERR_REPORT_DATE(-10009,"上报时间格式错误"),
-    GLOBAL_ERR_DEVICE_CODE(-10010,"改设备已存在"),
-    GLOBAL_ERR_NO_DEVICE(-10011,"改设备不存在"),
+    GLOBAL_ERR_DEVICE_CODE(-10010,"该设备已存在"),
+    GLOBAL_ERR_NO_DEVICE(-10011,"该设备不存在"),
     GLOBAL_ERR_REPORTS(-10012,"当前上报已存在"),
     GLOBAL_ERR_GET_REPORTS(-10013,"未查到最近上报记录"),
     GLOBAL_ERR_TRIP_CODE(-10014,"行程上报错误，请填写补报申请"),
-    GLOBAL_ERR_PTP_IN_REPORT_EXISTED(-10015,"改设备已经申报"),
+    GLOBAL_ERR_PTP_IN_REPORT_EXISTED(-10015,"该设备已经申报"),
     GLOBAL_ERR_PTP_CREATE_QE_CODE(-10016,"创建所有的小程序码失败"),
     ;
 
