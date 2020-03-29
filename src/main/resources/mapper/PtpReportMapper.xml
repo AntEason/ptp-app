@@ -48,7 +48,7 @@
         ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.get_device_id ) AS get_device_addrese,
         ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = r.out_device_id ) AS out_device_addrese,
         ( SELECT device_addrese FROM ptp_device WHERE edit_device_id = ir.device_id ) AS in_device_addrese,
-        ( SELECT create_time FROM ptp_device WHERE edit_device_id = ir.device_id ) AS  in_report_time,
+        ir.create_time AS  in_report_time,
         r.repair_get,
         r.report_type,
         r.repair_line,
