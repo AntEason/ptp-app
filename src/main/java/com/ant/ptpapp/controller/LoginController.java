@@ -183,6 +183,30 @@ public class LoginController {
             return GenericResponse.response(ServiceError.GLOBAL_ERR_BIND_PHONE);
         }
     }
+
+
+    @PostMapping("/wx/delPhone")
+    @ApiOperation(value = "修改电话号码",tags={"登陆接口"})
+    public GenericResponse delPhone(HttpServletRequest request)throws Exception{
+        PtpUserInfo ptpUserInfo=  getUserInfo(request);
+        if(ptpUserInfo==null){
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_NO_SIGN_IN);
+        }
+        QueryWrapper<PtpUserInfo> queryWrapper=new QueryWrapper<>();
+        queryWrapper.eq("wx_open_id",ptpUserInfo.getWxOpenId());
+        PtpUserInfo ptpUserInfos =ptpUserInfoService.getOne(queryWrapper);
+        ptpUserInfo.setUserPhone("");
+        ptpUserInfo.setUserInfoId(ptpUserInfos.getUserInfoId());
+        boolean result=ptpUserInfoService.updateById(ptpUserInfo);
+        if(result) {
+            String token = request.getHeader("Authorization").substring("Bearer ".length());
+            redisUtil.set(token, JSON.toJSONString(ptpUserInfo));
+            log.info("=======>"+JSON.toJSONString(ptpUserInfo));
+            return GenericResponse.response(ServiceError.NORMAL);
+        }else{
+            return GenericResponse.response(ServiceError.GLOBAL_ERR_BIND_PHONE);
+        }
+    }
     /**
      * 获取用户信息
      * @param request

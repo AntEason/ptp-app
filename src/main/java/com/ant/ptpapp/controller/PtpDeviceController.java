@@ -76,6 +76,7 @@ public class PtpDeviceController {
         //判断修改设备id相同
         QueryWrapper<PtpDevice> query=new QueryWrapper();
         query.eq("edit_device_id",reqPtpDevice.getEditDeviceId());
+        query.ne("device_id",reqPtpDevice.getDeviceId());
         if(ptpDeviceService.count(query)>0){
             return GenericResponse.response(ServiceError.GLOBAL_ERR_DEVICE_CODE);
         }
