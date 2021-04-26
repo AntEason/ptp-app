@@ -141,7 +141,7 @@
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>2.6</version>
+            <version>2.7</version>
         </dependency>
 
 <!--        &lt;!&ndash; 注意导入xfire-all jar包会与spring冲突 &ndash;&gt;-->
